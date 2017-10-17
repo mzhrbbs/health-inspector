@@ -4,6 +4,8 @@ import './index.css';
 import registerServiceWorker from './registerServiceWorker';
 import Search from './components/Search/Search'
 import Nav from './components/Nav/Nav'
+import {BrowserRouter as Router, Route} from 'react-router-dom'
+import ResultsList from './components/ResultsList/ResultsList'
 
 class App extends React.Component {
 
@@ -12,18 +14,29 @@ class App extends React.Component {
 
         this.state = {
             searched: false,
+            results: [],
+            loading: false
+            
         }
     }
 
     updateSearchTerm = (searchTerm) => {
-        console.log(`We are searching for ${searchTerm}`)
-        this.getSearchData(searchTerm).then((data) => {
-            console.log(data)
-            this.setState({
-                searched: true
+        if(searchTerm.length === 0){
+            return null
+            
+        }else{
+            this.setState({loading: true})
+             this.getSearchData(searchTerm).then((data) => {
+            
+                this.setState({
+                searched: true,
+                loading: false,
+                results: data
             })
 
         })
+        }
+       
     }
 
     resetSearch = () => {
@@ -52,16 +65,33 @@ class App extends React.Component {
 
     render () {
         return (
-            <div>
-                <Nav
-                    userHasSearched={this.state.searched} />
-                <Search
-                    logoSizeIsSmall={this.state.searched}
-                    updateSearchTerm={this.updateSearchTerm}
-                    resetSearch={this.resetSearch}
-                    changeFilter={this.changeFilter}
-                    filter={this.state.filter} />
-            </div>
+            <Router>
+                <div>
+                    <Nav
+                        userHasSearched={this.state.searched} />
+                    <Search
+                        logoSizeIsSmall={this.state.searched}
+                        updateSearchTerm={this.updateSearchTerm}
+                        resetSearch={this.resetSearch}
+                        changeFilter={this.changeFilter}
+                        filter={this.state.filter} />
+                <Route exact path="/" render= {() =>(
+                            
+                            <ResultsList 
+                                loading = {this.state.loading} 
+                                results =  {this.state.results}
+                                searched = {this.state.searched}
+                            />
+        
+                        )} />
+                   <Route exact path="/map/" render= {() =>(
+                            <h1>Map </h1>
+        
+                        )} />  
+
+                </div>
+            </Router>
+            
         )
     }
 }
